@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using DataStructures;
+﻿using DataStructures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FunctionalTests
 {
     [TestClass]
-    public sealed class ConcurrentSkipListTests : CollectionTests
+    public sealed class ConcurrentSkipListTests : ProducerConsumerCollectionTests<ConcurrentSkipList<int>>
     {
-        protected internal override ICollection<int> GetCollection()
+        protected internal override ConcurrentSkipList<int> GetCollection()
         {
             return new ConcurrentSkipList<int>();
         }

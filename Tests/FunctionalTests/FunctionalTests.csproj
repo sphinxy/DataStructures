@@ -53,6 +53,7 @@
     <Compile Include="Helpers\AssertEx.cs" />
     <Compile Include="CollectionTests.cs" />
     <Compile Include="ConcurrentSkipListTests.cs" />
+    <Compile Include="ProducerConsumerCollectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

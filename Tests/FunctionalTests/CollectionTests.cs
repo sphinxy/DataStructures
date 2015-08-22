@@ -5,9 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FunctionalTests
 {
-    public abstract class CollectionTests
+    public abstract class CollectionTests<T> where T:ICollection<int>
     {
-        protected internal abstract ICollection<int> GetCollection();
+        protected internal abstract T GetCollection();
 
         [TestMethod]
         public virtual void Add()
