@@ -12,20 +12,18 @@ namespace PerformanceTests
         [TestMethod]
         public void SkipList_ConcurrentReadWritePerformance()
         {
-            var count = 10;
+            const int count = 10;
             var times = new int[count];
+            var c = new ConcurrentSkipList<int>();
             for (var i = 0; i < count; i++)
             {
-                var c = new ConcurrentSkipList2<int>();
-                var t = new CollectionReadWritePerformance(c, 20, 10, 10000);
+                var t = new CollectionReadWritePerformance(c, 10, 5, 10000);
                 times[i] = t.Run().Milliseconds;
+                c.Clear();
             }
 
-            Array.Sort(times);
-            var min = times[0];
-            var max = times[count - 1];
-            var avg = times.Sum()/count;
-            Console.WriteLine("Avg: {0}, Min: {1}, Max: {2}", avg, min, max);
+            Console.WriteLine("Avg: {0}, Min: {1}, Max: {2}", times.Average(), times.Min(), times.Max());
+            Console.WriteLine(string.Join(" ", times));
         }
     }
 }
