@@ -19,6 +19,9 @@ namespace DataStructures
         internal byte _height;
         protected internal Node _lastFoundNode;
 
+        // ReSharper disable once StaticFieldInGenericType
+        private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
+
         public SkipList(IComparer<T> comparer = null)
         {
             _comparer = comparer ?? Comparer<T>.Default;
@@ -30,7 +33,7 @@ namespace DataStructures
         }
 
         /// <summary>
-        /// Remove all items from the collection.
+        /// Removes all items from the collection.
         /// </summary>
         public virtual void Clear()
         {
@@ -40,7 +43,7 @@ namespace DataStructures
         }
 
         /// <summary>
-        /// Check if the given item is present in the collection. Equality check is done using the provided or default comparer.
+        /// Checks if the given item is present in the collection. Equality check is done using the provided or default comparer.
         /// </summary>
         /// <param name="item">Item to check.</param>
         /// <returns>True, if collection contains the item, else - False.</returns>
@@ -64,7 +67,7 @@ namespace DataStructures
         }
 
         /// <summary>
-        /// Add a given item to the collection.
+        /// Adds a given item to the collection.
         /// </summary>
         /// <param name="item">Item to add.</param>
         public virtual void Add(T item)
@@ -75,7 +78,7 @@ namespace DataStructures
         }
 
         /// <summary>
-        /// Remove a given item from the collection (if it's present).
+        /// Removes a given item from the collection (if it's present).
         /// </summary>
         /// <param name="item">Item to remove.</param>
         /// <returns>True, if item was found and deleted, else - False.</returns>
@@ -87,26 +90,26 @@ namespace DataStructures
             DeleteNode(node);
             if (_lastFoundNode == node)
             {
-                _lastFoundNode = _head;
+                SetLastFoundNode(_head);
             }
 
             return true;
         }
 
         /// <summary>
-        /// Return the first item in the collection, without removing it.
+        /// Returns the first item in the collection, without removing it.
         /// </summary>
         /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
         /// <returns>First item in the collection.</returns>
         public virtual T Peek()
         {
-            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+            if (Count == 0) throw EmptyCollectionException;
 
             return _head.GetNext(0).Item;
         }
 
         /// <summary>
-        /// Return the first item in the collection, without removing it.
+        /// Returns the first item in the collection, without removing it.
         /// </summary>
         /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
         /// <returns>First item in the collection.</returns>
@@ -116,51 +119,79 @@ namespace DataStructures
         }
 
         /// <summary>
-        /// Return the last item in the collection, without removing it.
+        /// Returns the last item in the collection, without removing it.
         /// </summary>
         /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
         /// <returns>Last item in the collection.</returns>
         public virtual T GetLast()
         {
-            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+            if (Count == 0) throw EmptyCollectionException;
 
             return _tail.GetPrev(0).Item;
         }
 
         /// <summary>
-        /// Return the first item in the collection and remove it.
+        /// Returns the first item in the collection and removes it.
         /// </summary>
         /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
         /// <returns>First item in the collection.</returns>
         public virtual T Take()
         {
-            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+            if (Count == 0) throw EmptyCollectionException;
 
             Node node = _head.GetNext(0);
             DeleteNode(node);
             if (_lastFoundNode == node)
             {
-                _lastFoundNode = _head;
+                SetLastFoundNode(_head);
             }
             return node.Item;
         }
 
         /// <summary>
-        /// Return the last item in the collection and remove it.
+        /// Returns the last item in the collection and removes it.
         /// </summary>
         /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
         /// <returns>Last item in the collection.</returns>
         public virtual T TakeLast()
         {
-            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+            if (Count == 0) throw EmptyCollectionException;
 
             Node node = _tail.GetPrev(0);
             DeleteNode(node);
             if (_lastFoundNode == node)
             {
-                _lastFoundNode = _head;
+                SetLastFoundNode(_head);
             }
             return node.Item;
+        }
+
+        /// <summary>
+        /// Returns the greatest item, less than or equal to the given item, or default(T) if there is no such item.
+        /// </summary>
+        /// <param name="item">Item to match</param>
+        /// <returns>The greatest item, less than or equal to the given item, else default(T).</returns>
+        public virtual T Floor(T item)
+        {
+            Node node = FindNode(item);
+            SetLastFoundNode(node);
+            return node.Item;
+        }
+
+        /// <summary>
+        /// Returns the least item, greater than or equal to the given item, or default(T) if there is no such item.
+        /// </summary>
+        /// <param name="item">Item to match</param>
+        /// <returns>The least item, greater than or equal to the given item, else default(T).</returns>
+        public virtual T Ceiling(T item)
+        {
+            Node node = FindNode(item);
+            if (CompareNode(node, item) < 0)
+            {
+                node = node.GetNext(0);
+            }
+            SetLastFoundNode(node);
+            return node.Item;            
         }
 
         public virtual IEnumerator<T> GetEnumerator()
@@ -212,6 +243,11 @@ namespace DataStructures
             Count = 0;
             _height = 1;
             _lastFoundNode = _head;
+        }
+
+        protected internal virtual void SetLastFoundNode(Node node)
+        {
+            _lastFoundNode = node;
         }
 
         protected Node FindNode(T key)

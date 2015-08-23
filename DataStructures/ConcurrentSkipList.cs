@@ -159,6 +159,32 @@ namespace DataStructures
             }
         }
 
+        public override T Floor(T item)
+        {
+            _lock.EnterUpgradeableReadLock();
+            try
+            {
+                return base.Floor(item);
+            }
+            finally
+            {
+                _lock.ExitUpgradeableReadLock();
+            }
+        }
+
+        public override T Ceiling(T item)
+        {
+            _lock.EnterUpgradeableReadLock();
+            try
+            {
+                return base.Ceiling(item);
+            }
+            finally
+            {
+                _lock.ExitUpgradeableReadLock();
+            }
+        }
+
         public override IEnumerator<T> GetEnumerator()
         {
             IEnumerator<T> enumerator;
@@ -250,6 +276,26 @@ namespace DataStructures
         public bool IsSynchronized
         {
             get { return false; }
+        }
+
+        protected internal override void SetLastFoundNode(Node node)
+        {
+            bool hasOuterWriteLock = _lock.IsWriteLockHeld;
+            if (!hasOuterWriteLock)
+            {
+                _lock.EnterWriteLock();
+            }
+            try
+            {
+                base.SetLastFoundNode(node);
+            }
+            finally
+            {
+                if (!hasOuterWriteLock)
+                {
+                    _lock.ExitWriteLock();
+                }
+            }
         }
     }
 }
