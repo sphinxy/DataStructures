@@ -4,9 +4,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FunctionalTests
 {
     [TestClass]
-    public sealed class ConcurrentSkipListTests : ProducerConsumerCollectionTests<ConcurrentSkipList<int>>
+    public sealed class ConcurrentSkipListTests : SkipListTests
     {
-        protected internal override ConcurrentSkipList<int> GetCollection()
+        protected internal override SkipList<int> GetCollection()
         {
             return new ConcurrentSkipList<int>();
         }

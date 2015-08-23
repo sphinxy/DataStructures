@@ -16,7 +16,6 @@ namespace DataStructures
         private readonly Random _random = new Random();
         internal readonly Node _tail;
 
-        private int _count;
         internal byte _height;
         protected internal Node _lastFoundNode;
 
@@ -30,6 +29,9 @@ namespace DataStructures
             Reset();
         }
 
+        /// <summary>
+        /// Remove all items from the collection.
+        /// </summary>
         public virtual void Clear()
         {
             _head.SetHeight(HEIGHT_STEP);
@@ -37,6 +39,11 @@ namespace DataStructures
             Reset();
         }
 
+        /// <summary>
+        /// Check if the given item is present in the collection. Equality check is done using the provided or default comparer.
+        /// </summary>
+        /// <param name="item">Item to check.</param>
+        /// <returns>True, if collection contains the item, else - False.</returns>
         public virtual bool Contains(T item)
         {
             Node node = FindNode(item);
@@ -46,16 +53,20 @@ namespace DataStructures
             return CompareNode(node, item) == 0;
         }
 
-        public int Count
-        {
-            get { return _count; }
-        }
+        /// <summary>
+        /// Number of elements in collection.
+        /// </summary>
+        public int Count { get; private set; }
 
         public bool IsReadOnly
         {
             get { return false; }
         }
 
+        /// <summary>
+        /// Add a given item to the collection.
+        /// </summary>
+        /// <param name="item">Item to add.</param>
         public virtual void Add(T item)
         {
             Node prev = FindNode(item);
@@ -63,15 +74,93 @@ namespace DataStructures
             _lastFoundNode = AddNewNode(item, prev);
         }
 
+        /// <summary>
+        /// Remove a given item from the collection (if it's present).
+        /// </summary>
+        /// <param name="item">Item to remove.</param>
+        /// <returns>True, if item was found and deleted, else - False.</returns>
         public virtual bool Remove(T item)
         {
             Node node = FindNode(item);
             if (CompareNode(node, item) != 0) return false;
 
-
             DeleteNode(node);
+            if (_lastFoundNode == node)
+            {
+                _lastFoundNode = _head;
+            }
 
             return true;
+        }
+
+        /// <summary>
+        /// Return the first item in the collection, without removing it.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
+        /// <returns>First item in the collection.</returns>
+        public virtual T Peek()
+        {
+            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+
+            return _head.GetNext(0).Item;
+        }
+
+        /// <summary>
+        /// Return the first item in the collection, without removing it.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
+        /// <returns>First item in the collection.</returns>
+        public virtual T GetFirst()
+        {
+            return Peek();
+        }
+
+        /// <summary>
+        /// Return the last item in the collection, without removing it.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
+        /// <returns>Last item in the collection.</returns>
+        public virtual T GetLast()
+        {
+            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+
+            return _tail.GetPrev(0).Item;
+        }
+
+        /// <summary>
+        /// Return the first item in the collection and remove it.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
+        /// <returns>First item in the collection.</returns>
+        public virtual T Take()
+        {
+            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+
+            Node node = _head.GetNext(0);
+            DeleteNode(node);
+            if (_lastFoundNode == node)
+            {
+                _lastFoundNode = _head;
+            }
+            return node.Item;
+        }
+
+        /// <summary>
+        /// Return the last item in the collection and remove it.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="InvalidOperationException"/> is thrown if collection is empty.</exception>
+        /// <returns>Last item in the collection.</returns>
+        public virtual T TakeLast()
+        {
+            if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+
+            Node node = _tail.GetPrev(0);
+            DeleteNode(node);
+            if (_lastFoundNode == node)
+            {
+                _lastFoundNode = _head;
+            }
+            return node.Item;
         }
 
         public virtual IEnumerator<T> GetEnumerator()
@@ -120,7 +209,7 @@ namespace DataStructures
                 _tail.SetPrev(i, _head);
             }
 
-            _count = 0;
+            Count = 0;
             _height = 1;
             _lastFoundNode = _head;
         }
@@ -169,14 +258,14 @@ namespace DataStructures
 
             var newNode = new Node(item, newNodeHeight);
             InsertNode(newNode, newNodeHeight, prev, next);
-            _count++;
+            Count++;
             return newNode;
         }
 
         private byte GetNewNodeHeight()
         {
             byte maxNodeHeight = _height;
-            if (maxNodeHeight < MAX_HEIGHT && (1 << maxNodeHeight) < _count)
+            if (maxNodeHeight < MAX_HEIGHT && (1 << maxNodeHeight) < Count)
             {
                 maxNodeHeight++;
             }
@@ -200,7 +289,7 @@ namespace DataStructures
             return nodeHeight;
         }
 
-        private void InsertNode(Node newNode, byte height, Node prev, Node next)
+        private static void InsertNode(Node newNode, byte height, Node prev, Node next)
         {
             for (int i = 0; i < height; i++)
             {
@@ -228,9 +317,9 @@ namespace DataStructures
                 next.SetPrev(i, prev);
             }
 
-            _count--;
+            Count--;
 
-            if (_height > 1 && (1 << _height) > _count)
+            if (_height > 1 && (1 << _height) > Count)
             {
                 _height--;
             }

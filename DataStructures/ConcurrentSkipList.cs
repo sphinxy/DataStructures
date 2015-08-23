@@ -89,6 +89,10 @@ namespace DataStructures
                 try
                 {
                     DeleteNode(node);
+                    if (_lastFoundNode == node)
+                    {
+                        _lastFoundNode = _head;
+                    }
                 }
                 finally
                 {
@@ -101,6 +105,58 @@ namespace DataStructures
             }
 
             return true;
+        }
+
+        public override T GetLast()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                return base.GetLast();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public override T Peek()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                return base.Peek();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public override T Take()
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                return base.Take();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public override T TakeLast()
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                return base.TakeLast();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         public override IEnumerator<T> GetEnumerator()
