@@ -125,6 +125,8 @@ namespace FunctionalTests
                 var item = random.Next(count);
                 while (!store[item])
                 {
+                    // if item is not in the store it should not be in the collection
+                    Assert.IsFalse(target.Remove(item));
                     item = random.Next(count);
                 }
 

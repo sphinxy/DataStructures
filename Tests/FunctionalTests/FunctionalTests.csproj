@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="SkipListTests.cs" />
     <Compile Include="Helpers\AssertEx.cs" />
     <Compile Include="CollectionTests.cs" />
     <Compile Include="ConcurrentSkipListTests.cs" />
