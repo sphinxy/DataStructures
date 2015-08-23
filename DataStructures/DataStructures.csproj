@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PriorityQueue.cs" />
     <Compile Include="SkipList.cs" />
     <Compile Include="ConcurrentSkipList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
