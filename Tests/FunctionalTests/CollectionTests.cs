@@ -80,7 +80,7 @@ namespace FunctionalTests
             var result = new int[count];
             target.CopyTo(result, 0);
 
-            Array.Sort(result);
+//            Array.Sort(result);
             for (var i = 0; i < count; i++)
             {
                 Assert.AreEqual(i, result[i]);
@@ -90,7 +90,7 @@ namespace FunctionalTests
             result[0] = -1;
             target.CopyTo(result, 1);
             Assert.AreEqual(-1, result[0]);
-            Array.Sort(result);
+//            Array.Sort(result);
             for (var i = 0; i < count; i++)
             {
                 Assert.AreEqual(i, result[i+1]);
