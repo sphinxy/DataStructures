@@ -48,6 +48,8 @@ namespace FunctionalTests
             }
         }
 
+        // TODO override the GetEnumerator test
+
         [TestMethod]
         public void Take()
         {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace DataStructures
 {
+    // TODO add description
     public class PriorityQueue<T> : ICollection<T> where T : IComparable<T>
     {
         private readonly IComparer<T> _comparer;
@@ -13,7 +14,6 @@ namespace DataStructures
         private const int RESIZE_FACTOR = 2;
 
         private int _shrinkBound;
-        private int _count;
 
         // ReSharper disable once StaticFieldInGenericType
         private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
@@ -47,9 +47,9 @@ namespace DataStructures
         {
             if (Count == Capacity) GrowCapacity();
 
-            _heap[_count++] = item;
+            _heap[Count++] = item;
 
-            _heap.Sift(_count, _comparer); // move item "up" until heap principles are not met
+            _heap.Sift(Count, _comparer);      // move item "up" until heap principles are not met
         }
 
         public virtual T Take()
@@ -57,10 +57,10 @@ namespace DataStructures
             if (Count == 0) throw EmptyCollectionException;
 
             var item = _heap[0];
-            _count--;
-            _heap.Swap(0, _count);              // last element at count
-            _heap[_count] = default(T);         // release hold on the object
-            _heap.Sink(1, _count, _comparer);   // move item "down" while heap principles are not met            
+            Count--;
+            _heap.Swap(0, Count);              // last element at count
+            _heap[Count] = default(T);         // release hold on the object
+            _heap.Sink(1, Count, _comparer);   // move item "down" while heap principles are not met            
 
             if (Count <= _shrinkBound && Count > DEFAULT_CAPACITY)
             {
@@ -73,7 +73,7 @@ namespace DataStructures
         public void Clear()
         {
             _heap = new T[DEFAULT_CAPACITY];
-            _count = 0;
+            Count = 0;
         }
 
         public bool Contains(T item)
@@ -89,9 +89,9 @@ namespace DataStructures
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException("Insufficient space in destination array.");
             
-            Array.Copy(_heap, 0, array, arrayIndex, _count);
+            Array.Copy(_heap, 0, array, arrayIndex, Count);
 
-            array.HeapSort(arrayIndex, _count, _comparer);
+            array.HeapSort(arrayIndex, Count, _comparer);
         }
 
         public bool Remove(T item)
@@ -105,7 +105,7 @@ namespace DataStructures
                     Take();
                     break;
                 default:
-                    _count--;
+                    Count--;
                     _heap.Swap(index, Count);   // last element at Count
                     _heap[Count] = default(T);  // release hold on the object
                     int parent = index / 2;     // get parent
@@ -125,10 +125,7 @@ namespace DataStructures
 
         }
 
-        public int Count
-        {
-            get { return _count; }
-        }
+        public int Count { get; private set; }
 
         public bool IsReadOnly { get { return false; } }
 
