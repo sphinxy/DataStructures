@@ -14,6 +14,41 @@ namespace FunctionalTests
         }
 
         [TestMethod]
+        public override void CopyTo()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            const int count = 10;
+            for (var i = 0; i < count; i++)
+            {
+                target.Add(i);
+            }
+
+            AssertEx.Throws<ArgumentNullException>(() => target.CopyTo(null, 0));
+            AssertEx.Throws<ArgumentOutOfRangeException>(() => target.CopyTo(new int[count], -1));
+            AssertEx.Throws<ArgumentException>(() => target.CopyTo(new int[1], 0));
+
+            var result = new int[count];
+            target.CopyTo(result, 0);
+
+            // Priority queue is max-based so greater items comes first
+            for (var i = 0; i < count; i++)
+            {
+                Assert.AreEqual(count - i - 1, result[i]);
+            }
+
+            result = new int[count + 1];
+            result[0] = -1;
+            target.CopyTo(result, 1);
+            Assert.AreEqual(-1, result[0]);
+            for (var i = 0; i < count; i++)
+            {
+                Assert.AreEqual(count - i - 1, result[i + 1]);
+            }
+        }
+
+        [TestMethod]
         public void Take()
         {
             var target = GetCollection();

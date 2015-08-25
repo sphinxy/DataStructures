@@ -7,12 +7,13 @@ namespace DataStructures
     public class PriorityQueue<T> : ICollection<T> where T : IComparable<T>
     {
         private readonly IComparer<T> _comparer;
-        private T[] _items;
+        private T[] _heap;
         private const int DEFAULT_CAPACITY = 10;
         private const int SHRINK_RATIO = 4;
         private const int RESIZE_FACTOR = 2;
 
         private int _shrinkBound;
+        private int _count;
 
         // ReSharper disable once StaticFieldInGenericType
         private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
@@ -24,17 +25,17 @@ namespace DataStructures
             if (capacity <= 0) throw new ArgumentOutOfRangeException("capacity", "Expected capacity greater than zero.");
 
             _comparer = comparer ?? Comparer<T>.Default;
-            _shrinkBound =capacity / SHRINK_RATIO;
-
-            // for simplicity of calculations first element is at position 1, so one spot is always empty
-            _items = new T[capacity + 1];
+            _shrinkBound = capacity / SHRINK_RATIO;
+            _heap = new T[capacity];
         }
 
-        public int Capacity { get { return _items.Length - 1; } }
+        public int Capacity { get { return _heap.Length; } }
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            var array = new T[Count];
+            CopyTo(array, 0);
+            return (IEnumerator<T>) array.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -46,20 +47,20 @@ namespace DataStructures
         {
             if (Count == Capacity) GrowCapacity();
 
-            _items[++Count] = item;
+            _heap[_count++] = item;
 
-            Sift(Count);                // move item "up" until heap principles are not met
+            _heap.Sift(_count, _comparer); // move item "up" until heap principles are not met
         }
 
         public virtual T Take()
         {
             if (Count == 0) throw EmptyCollectionException;
 
-            var item = _items[1];       // first element at 1
-            Swap(1, Count);             // last element at Count
-            _items[Count] = default(T); // release hold on the object
-            Count--;                    // update count after the element is really gone but before Sink
-            Sink(1);                    // move item "down" while heap principles are not met
+            var item = _heap[0];
+            _count--;
+            _heap.Swap(0, _count);              // last element at count
+            _heap[_count] = default(T);         // release hold on the object
+            _heap.Sink(1, _count, _comparer);   // move item "down" while heap principles are not met            
 
             if (Count <= _shrinkBound && Count > DEFAULT_CAPACITY)
             {
@@ -71,18 +72,26 @@ namespace DataStructures
 
         public void Clear()
         {
-            _items = new T[1 + DEFAULT_CAPACITY];
-            Count = 0;
+            _heap = new T[DEFAULT_CAPACITY];
+            _count = 0;
         }
 
         public bool Contains(T item)
         {
-            return GetItemIndex(item) > 0;
+            return GetItemIndex(item) >= 0;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            if (array == null) throw new ArgumentNullException("array");
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException("arrayIndex");
+
+            if (array.Length - arrayIndex < Count)
+                throw new ArgumentException("Insufficient space in destination array.");
+            
+            Array.Copy(_heap, 0, array, arrayIndex, _count);
+
+            array.HeapSort(arrayIndex, _count, _comparer);
         }
 
         public bool Remove(T item)
@@ -90,24 +99,24 @@ namespace DataStructures
             int index = GetItemIndex(item);
             switch (index)
             {
-                case 0:
+                case -1:
                     return false;
-                case 1:
+                case 0:
                     Take();
                     break;
                 default:
-                    Swap(index, Count);         // last element at Count
-                    _items[Count] = default(T); // release hold on the object
-                    Count--;                    // update count after the element is really gone but before Sink
+                    _count--;
+                    _heap.Swap(index, Count);   // last element at Count
+                    _heap[Count] = default(T);  // release hold on the object
                     int parent = index / 2;     // get parent
                     // if new item at index is greater than it's parent then sift it up, else sink it down
-                    if (GreaterOrEqual(_items[index], _items[parent]))
+                    if (_comparer.GreaterOrEqual(_heap[index], _heap[parent]))
                     {
-                        Sift(index);
+                        _heap.Sift(index, _comparer);
                     }
                     else
                     {
-                        Sink(index);
+                        _heap.Sink(index, Count, _comparer);
                     }
                     break;
             }
@@ -116,92 +125,140 @@ namespace DataStructures
 
         }
 
-        public int Count { get; private set; }
+        public int Count
+        {
+            get { return _count; }
+        }
+
         public bool IsReadOnly { get { return false; } }
 
         /// <summary>
-        /// Returns index of the first occurrence of the given item or 0.
+        /// Returns index of the first occurrence of the given item or -1.
         /// </summary>
         private int GetItemIndex(T item)
         {
-            for (int i = 1; i <= Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                if (_comparer.Compare(_items[i], item) == 0) return i;
+                if (_comparer.Compare(_heap[i], item) == 0) return i;
             }
-            return 0;
+            return -1;
         }
 
-        private bool GreaterOrEqual(T i, T j)
-        {
-            return _comparer.Compare(i, j) >= 0;
-        }
-
-        /// <summary>
-        /// Moves the item with given index "down" the heap while heap principles are not met.
-        /// </summary>
-        private void Sink(int i)
-        {
-            while (true)
-            {
-                int leftChildIndex = 2 * i;
-                int rightChildIndex = 2 * i + 1;
-                if (leftChildIndex > Count) return; // reached last item
-
-                var item = _items[i];
-                var left = _items[leftChildIndex];
-                var hasRight = rightChildIndex <= Count; // _items are 1 based
-                var right = default(T);
-                if (hasRight) right = _items[rightChildIndex];
-
-                // if item is greater than children - exit
-                if (GreaterOrEqual(item, left) && (!hasRight || GreaterOrEqual(item, right))) return;
-
-                // else exchange with greater of children
-                int greaterChildIndex = !hasRight || GreaterOrEqual(left, right) ? leftChildIndex : rightChildIndex;
-                Swap(i, greaterChildIndex);
-
-                // continue at new position
-                i = greaterChildIndex;
-            }
-        }
-
-        /// <summary>
-        /// Moves the item with given index "up" the heap while heap principles are not met.
-        /// </summary>
-        private void Sift(int i)
-        {
-            while (true)
-            {
-                if (i <= 1) return;         // reached root
-                int parent = i / 2;         // get parent
-
-                // if root is greater or equal - exit
-                if (GreaterOrEqual(_items[parent], _items[i])) return;
-
-                Swap(parent, i);
-                i = parent;
-            }
-        }
-
-        private void Swap(int i, int j)
-        {
-            var tmp = _items[i];
-            _items[i] = _items[j];
-            _items[j] = tmp;
-        }
 
         private void GrowCapacity()
         {
             int newCapacity = Capacity * RESIZE_FACTOR;
-            Array.Resize(ref _items, newCapacity + 1);  // first element is at position 1
+            Array.Resize(ref _heap, newCapacity);  // first element is at position 1
             _shrinkBound = newCapacity / SHRINK_RATIO;
         }
 
         private void ShrinkCapacity()
         {
             int newCapacity = Capacity / RESIZE_FACTOR;
-            Array.Resize(ref _items, newCapacity + 1);  // first element is at position 1
+            Array.Resize(ref _heap, newCapacity);  // first element is at position 1
             _shrinkBound = newCapacity / SHRINK_RATIO;
+        }
+    }
+
+    internal static class HeapMethods
+    {
+        internal static void Swap<T>(this T[] array, int i, int j)
+        {
+            var tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+        }
+
+        internal static bool GreaterOrEqual<T>(this IComparer<T> comparer, T x, T y)
+        {
+            return comparer.Compare(x, y) >= 0;
+        }
+
+        /// <summary>
+        /// Moves the item with given index "down" the heap while heap principles are not met.
+        /// </summary>
+        /// <typeparam name="T">Any comparable type</typeparam>
+        /// <param name="heap">Array, containing the heap</param>
+        /// <param name="i">1-based index of the element to sink</param>
+        /// <param name="count">Number of items in the heap</param>
+        /// <param name="comparer">Comparer to compare the items</param>
+        /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
+        /// Default value of -1 allowes to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
+        /// </param>
+        internal static void Sink<T>(this T[] heap, int i, int count, IComparer<T> comparer, int shift = -1)
+        {
+            var lastIndex = count + shift;
+            while (true)
+            {
+                var itemIndex = i + shift;
+                var leftIndex = 2 * i + shift;
+                if (leftIndex >= lastIndex) return;      // reached last item
+                var rightIndex = leftIndex + 1;
+                var hasRight = rightIndex < lastIndex;
+
+                var item = heap[i + shift];
+                var left = heap[leftIndex];
+                var right = hasRight ? heap[rightIndex] : default(T);
+
+                // if item is greater than children - exit
+                if (GreaterOrEqual(comparer, item, left) && (!hasRight || GreaterOrEqual(comparer, item, right))) return;
+
+                // else exchange with greater of children
+                int greaterChildIndex = !hasRight || GreaterOrEqual(comparer, left, right) ? leftIndex : rightIndex;
+                heap.Swap(itemIndex, greaterChildIndex);
+
+                // continue at new position
+                i = greaterChildIndex - shift;
+            }
+        }
+
+        /// <summary>
+        /// Moves the item with given index "up" the heap while heap principles are not met.
+        /// </summary>
+        /// <typeparam name="T">Any comparable type</typeparam>
+        /// <param name="heap">Array, containing the heap</param>
+        /// <param name="i">1-based index of the element to sink</param>
+        /// <param name="comparer">Comparer to compare the items</param>
+        /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
+        /// Default value of -1 allowes to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
+        /// </param>        
+        internal static void Sift<T>(this T[] heap, int i, IComparer<T> comparer, int shift = -1)
+        {
+            while (true)
+            {
+                if (i <= 1) return;         // reached root
+                int parent = i / 2 + shift; // get parent
+                var index = i + shift;
+
+                // if root is greater or equal - exit
+                if (GreaterOrEqual(comparer, heap[parent], heap[index])) return;
+
+                heap.Swap(parent, index);
+                i = parent - shift;
+            }
+        }
+
+        /// <summary>
+        /// Sorts the heap in descending order.
+        /// </summary>
+        /// <typeparam name="T">Any comparable type</typeparam>
+        /// <param name="heap">Array, containing the heap</param>
+        /// <param name="startIndex">Index in the array, from which the heap structure begins</param>
+        /// <param name="count">Number of items in the heap</param>
+        /// <param name="comparer">Comparer to compare the items</param>
+        internal static void HeapSort<T>(this T[] heap, int startIndex, int count, IComparer<T> comparer)
+        {
+            var shift = startIndex - 1;
+            var lastIndex = startIndex + count;
+            var left = count;
+            while (lastIndex > startIndex)
+            {
+                lastIndex--;
+                left--;
+                heap.Swap(startIndex, lastIndex);
+                heap.Sink(1, left, comparer, shift);
+            }
+            Array.Reverse(heap, startIndex, count);            
         }
     }
 }

@@ -10,7 +10,30 @@ namespace FunctionalTests
         protected internal abstract T GetCollection();
 
         [TestMethod]
-        public virtual void Add()
+        public virtual void AddSimple()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            target.Add(1);
+            Assert.AreEqual(1, target.Count);
+            Assert.IsTrue(target.Contains(1));
+
+            target.Add(2);
+            Assert.AreEqual(2, target.Count);
+            Assert.IsTrue(target.Contains(1));
+            Assert.IsTrue(target.Contains(2));
+
+            target.Add(3);
+            Assert.AreEqual(3, target.Count);
+            Assert.IsTrue(target.Contains(1));
+            Assert.IsTrue(target.Contains(2));
+            Assert.IsTrue(target.Contains(3));
+        }
+
+
+        [TestMethod]
+        public virtual void AddRandomized()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
@@ -80,7 +103,6 @@ namespace FunctionalTests
             var result = new int[count];
             target.CopyTo(result, 0);
 
-//            Array.Sort(result);
             for (var i = 0; i < count; i++)
             {
                 Assert.AreEqual(i, result[i]);
@@ -90,7 +112,6 @@ namespace FunctionalTests
             result[0] = -1;
             target.CopyTo(result, 1);
             Assert.AreEqual(-1, result[0]);
-//            Array.Sort(result);
             for (var i = 0; i < count; i++)
             {
                 Assert.AreEqual(i, result[i+1]);
@@ -98,7 +119,42 @@ namespace FunctionalTests
         }
 
         [TestMethod]
-        public virtual void Remove()
+        public virtual void RemoveSimple()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            for (var i = 0; i < 5; i++)
+            {
+                target.Add(i);
+            }
+            Assert.AreEqual(5, target.Count);
+
+            Assert.IsTrue(target.Remove(0));
+            Assert.AreEqual(4, target.Count);
+            Assert.IsFalse(target.Contains(0));
+
+            Assert.IsFalse(target.Remove(0));
+
+            Assert.IsTrue(target.Remove(2));
+            Assert.AreEqual(3, target.Count);
+            Assert.IsFalse(target.Contains(2));
+            Assert.IsFalse(target.Remove(2));
+
+            Assert.IsTrue(target.Remove(1));
+            Assert.IsTrue(target.Remove(3));
+            Assert.AreEqual(1, target.Count);
+            Assert.IsFalse(target.Contains(1));
+            Assert.IsFalse(target.Contains(3));
+            Assert.IsTrue(target.Contains(4));
+
+            Assert.IsTrue(target.Remove(4));
+            Assert.AreEqual(0, target.Count);
+            Assert.IsFalse(target.Contains(4));
+        }
+
+        [TestMethod]
+        public virtual void RemoveRandomized()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
