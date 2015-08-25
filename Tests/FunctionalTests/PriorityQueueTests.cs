@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using DataStructures;
 using FunctionalTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,10 +49,30 @@ namespace FunctionalTests
             }
         }
 
-        // TODO override the GetEnumerator test
+        [TestMethod]
+        public override void GetEnumerator()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            const int count = 10;
+            for (var i = 0; i < count; i++)
+            {
+                target.Add(i);
+            }
+
+            var enumerator = target.GetEnumerator();
+            int x = 9;
+            while (enumerator.MoveNext())
+            {
+                Assert.AreEqual(x, enumerator.Current);
+                x--;
+            }
+            Assert.AreEqual(-1, x);
+        }
 
         [TestMethod]
-        public void Take()
+        public void TakeSimple()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
@@ -78,6 +99,66 @@ namespace FunctionalTests
             Assert.AreEqual(1, target.Count);
             Assert.AreEqual(0, target.Take());
             Assert.AreEqual(0, target.Count);
+        }
+
+        [TestMethod]
+        public void TakeRandomized()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            var store = new SortedSet<int>();
+            var random = new Random();
+            const int count = 1000;
+            for (var i = 0; i < count; i++)
+            {
+                var item = random.Next(2 * count);
+                while (store.Contains(item))
+                {
+                    item = random.Next(2 * count);
+                }
+
+                if (target.Count < 10)
+                {
+                    target.Add(item);
+                    store.Add(item);
+                }
+                else
+                {
+                    Assert.AreEqual(store.Max, target.Take());
+                    store.Remove(store.Max);
+                }
+            }
+        }
+
+        // TODO write a test which will add, remove and take randomly and after each step check that heap principles stand
+
+        [TestMethod]
+        public void PeekSimple()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            AssertEx.Throws<InvalidOperationException>(() => target.Peek());
+
+            target.Add(1);
+            Assert.AreEqual(1, target.Peek());
+            Assert.AreEqual(1, target.Count);
+
+            target.Add(2);
+            Assert.AreEqual(2, target.Peek());
+            Assert.AreEqual(2, target.Count);
+
+            target.Add(0);
+            Assert.AreEqual(2, target.Peek());
+            Assert.AreEqual(3, target.Count);
+
+            target.Take();
+            Assert.AreEqual(1, target.Peek());
+
+            target.Add(3);
+            Assert.AreEqual(3, target.Peek());
+            Assert.AreEqual(3, target.Count);
         }
     }
 }

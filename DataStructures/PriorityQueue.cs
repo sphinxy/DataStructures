@@ -4,7 +4,13 @@ using System.Collections.Generic;
 
 namespace DataStructures
 {
-    // TODO add description
+    /// <summary>
+    /// Heap-based resizable max priority queue.
+    /// Elements with high priority are served before elements with low priority.
+    /// Priority is defined by comparing elements, so to separate priority from value use
+    /// KeyValuePair or a custom class and provide corresponding Comparer.
+    /// </summary>
+    /// <typeparam name="T">Any comparable type</typeparam>
     public class PriorityQueue<T> : ICollection<T> where T : IComparable<T>
     {
         private readonly IComparer<T> _comparer;
@@ -18,8 +24,18 @@ namespace DataStructures
         // ReSharper disable once StaticFieldInGenericType
         private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
 
+        /// <summary>
+        /// Create a max-priority queue with default capacity.
+        /// </summary>
+        /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         public PriorityQueue(IComparer<T> comparer = null) : this(DEFAULT_CAPACITY, comparer) { }
 
+        /// <summary>
+        /// Create a max-priority queue with initial capacity.
+        /// </summary>
+        /// <param name="capacity">Initial capacity</param>
+        /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Throws <see cref="ArgumentOutOfRangeException"/> when capacity is less than or equal to zero.</exception>
         public PriorityQueue(int capacity, IComparer<T> comparer = null)
         {
             if (capacity <= 0) throw new ArgumentOutOfRangeException("capacity", "Expected capacity greater than zero.");
@@ -29,13 +45,16 @@ namespace DataStructures
             _heap = new T[capacity];
         }
 
+        /// <summary>
+        /// Current queue capacity
+        /// </summary>
         public int Capacity { get { return _heap.Length; } }
 
         public IEnumerator<T> GetEnumerator()
         {
             var array = new T[Count];
             CopyTo(array, 0);
-            return (IEnumerator<T>) array.GetEnumerator();
+            return ((IEnumerable <T>)array).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -48,10 +67,14 @@ namespace DataStructures
             if (Count == Capacity) GrowCapacity();
 
             _heap[Count++] = item;
-
             _heap.Sift(Count, _comparer);      // move item "up" until heap principles are not met
         }
 
+        /// <summary>
+        /// Removes and returns a max element from the priority queue.
+        /// </summary>
+        /// <returns>Max element in the collection</returns>
+        /// <exception cref="InvalidOperationException">Throws <see cref="InvalidOperationException"/> when queue is empty.</exception>
         public virtual T Take()
         {
             if (Count == 0) throw EmptyCollectionException;
@@ -68,6 +91,17 @@ namespace DataStructures
             }
 
             return item;
+        }
+
+        /// <summary>
+        /// Returns a max element from the priority queue without removing it.
+        /// </summary>
+        /// <returns>Max element in the collection</returns>
+        /// <exception cref="InvalidOperationException">Throws <see cref="InvalidOperationException"/> when queue is empty.</exception>
+        public virtual T Peek()
+        {
+            if (Count == 0) throw EmptyCollectionException;
+            return _heap[0];
         }
 
         public void Clear()
@@ -189,7 +223,7 @@ namespace DataStructures
             {
                 var itemIndex = i + shift;
                 var leftIndex = 2 * i + shift;
-                if (leftIndex >= lastIndex) return;      // reached last item
+                if (leftIndex > lastIndex) return;      // reached last item
                 var rightIndex = leftIndex + 1;
                 var hasRight = rightIndex < lastIndex;
 
@@ -201,7 +235,7 @@ namespace DataStructures
                 if (GreaterOrEqual(comparer, item, left) && (!hasRight || GreaterOrEqual(comparer, item, right))) return;
 
                 // else exchange with greater of children
-                int greaterChildIndex = !hasRight || GreaterOrEqual(comparer, left, right) ? leftIndex : rightIndex;
+                var greaterChildIndex = !hasRight || GreaterOrEqual(comparer, left, right) ? leftIndex : rightIndex;
                 heap.Swap(itemIndex, greaterChildIndex);
 
                 // continue at new position
@@ -223,8 +257,8 @@ namespace DataStructures
         {
             while (true)
             {
-                if (i <= 1) return;         // reached root
-                int parent = i / 2 + shift; // get parent
+                if (i <= 1) return;             // reached root
+                var parent = i / 2 + shift;   // get parent
                 var index = i + shift;
 
                 // if root is greater or equal - exit
@@ -248,6 +282,10 @@ namespace DataStructures
             var shift = startIndex - 1;
             var lastIndex = startIndex + count;
             var left = count;
+            
+            // take the max item and exchange it with the last one 
+            // decrement the count of items in the heap and sink the first item to restore the heap rules
+            // repeat for every element in the heap
             while (lastIndex > startIndex)
             {
                 lastIndex--;
@@ -255,6 +293,7 @@ namespace DataStructures
                 heap.Swap(startIndex, lastIndex);
                 heap.Sink(1, left, comparer, shift);
             }
+            // when done items will be sorted in ascending order, but this is a Max-PriorityQueue, so reverse
             Array.Reverse(heap, startIndex, count);            
         }
     }
