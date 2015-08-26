@@ -14,7 +14,7 @@ namespace DataStructures
     public class PriorityQueue<T> : ICollection<T> where T : IComparable<T>
     {
         private readonly IComparer<T> _comparer;
-        private T[] _heap;
+        internal T[] _heap;
         private const int DEFAULT_CAPACITY = 10;
         private const int SHRINK_RATIO = 4;
         private const int RESIZE_FACTOR = 2;
@@ -223,16 +223,22 @@ namespace DataStructures
             {
                 var itemIndex = i + shift;
                 var leftIndex = 2 * i + shift;
-                if (leftIndex > lastIndex) return;      // reached last item
+                if (leftIndex > lastIndex) {
+                    return;      // reached last item
+                }
+                
                 var rightIndex = leftIndex + 1;
-                var hasRight = rightIndex < lastIndex;
+                var hasRight = rightIndex <= lastIndex;
 
-                var item = heap[i + shift];
+                var item = heap[itemIndex];
                 var left = heap[leftIndex];
                 var right = hasRight ? heap[rightIndex] : default(T);
 
                 // if item is greater than children - exit
-                if (GreaterOrEqual(comparer, item, left) && (!hasRight || GreaterOrEqual(comparer, item, right))) return;
+                if (GreaterOrEqual(comparer, item, left) && (!hasRight || GreaterOrEqual(comparer, item, right)))
+                {
+                    return;
+                }
 
                 // else exchange with greater of children
                 var greaterChildIndex = !hasRight || GreaterOrEqual(comparer, left, right) ? leftIndex : rightIndex;
@@ -257,12 +263,15 @@ namespace DataStructures
         {
             while (true)
             {
-                if (i <= 1) return;             // reached root
+                if (i <= 1) return;           // reached root
                 var parent = i / 2 + shift;   // get parent
                 var index = i + shift;
 
                 // if root is greater or equal - exit
-                if (GreaterOrEqual(comparer, heap[parent], heap[index])) return;
+                if (GreaterOrEqual(comparer, heap[parent], heap[index]))
+                {
+                    return;
+                }
 
                 heap.Swap(parent, index);
                 i = parent - shift;

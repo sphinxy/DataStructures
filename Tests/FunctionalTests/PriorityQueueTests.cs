@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DataStructures;
 using FunctionalTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -125,13 +126,30 @@ namespace FunctionalTests
                 }
                 else
                 {
-                    Assert.AreEqual(store.Max, target.Take());
+                    item = target.Take();
+                    Assert.AreEqual(store.Max, item);
                     store.Remove(store.Max);
                 }
+                CheckStructure(target);
             }
         }
 
-        // TODO write a test which will add, remove and take randomly and after each step check that heap principles stand
+        private void CheckStructure(PriorityQueue<int> queue)
+        {
+            for (int i = 0; i < queue.Count/2; i++)
+            {
+                var left = (i + 1)*2 - 1;
+                var right = (i + 1)*2;
+                if (queue._heap[i] < queue._heap[left])
+                {
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}", queue._heap[i], i, queue._heap[left], left);
+                }                
+                if (right < queue._heap.Length && queue._heap[i] < queue._heap[right])
+                {
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}", queue._heap[i], i, queue._heap[right], right);
+                }
+            }
+        }
 
         [TestMethod]
         public void PeekSimple()
