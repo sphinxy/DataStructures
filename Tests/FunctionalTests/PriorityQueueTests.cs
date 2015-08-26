@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using DataStructures;
 using FunctionalTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,15 +17,16 @@ namespace FunctionalTests
         [TestMethod]
         public override void CopyTo()
         {
-            var target = GetCollection();
+            PriorityQueue<int> target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             const int count = 10;
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 target.Add(i);
             }
 
+            // ReSharper disable once AssignNullToNotNullAttribute
             AssertEx.Throws<ArgumentNullException>(() => target.CopyTo(null, 0));
             AssertEx.Throws<ArgumentOutOfRangeException>(() => target.CopyTo(new int[count], -1));
             AssertEx.Throws<ArgumentException>(() => target.CopyTo(new int[1], 0));
@@ -35,7 +35,7 @@ namespace FunctionalTests
             target.CopyTo(result, 0);
 
             // Priority queue is max-based so greater items comes first
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 Assert.AreEqual(count - i - 1, result[i]);
             }
@@ -44,7 +44,7 @@ namespace FunctionalTests
             result[0] = -1;
             target.CopyTo(result, 1);
             Assert.AreEqual(-1, result[0]);
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 Assert.AreEqual(count - i - 1, result[i + 1]);
             }
@@ -53,16 +53,16 @@ namespace FunctionalTests
         [TestMethod]
         public override void GetEnumerator()
         {
-            var target = GetCollection();
+            PriorityQueue<int> target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             const int count = 10;
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 target.Add(i);
             }
 
-            var enumerator = target.GetEnumerator();
+            IEnumerator<int> enumerator = target.GetEnumerator();
             int x = 9;
             while (enumerator.MoveNext())
             {
@@ -75,7 +75,7 @@ namespace FunctionalTests
         [TestMethod]
         public void TakeSimple()
         {
-            var target = GetCollection();
+            PriorityQueue<int> target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             AssertEx.Throws<InvalidOperationException>(() => target.Take());
@@ -105,18 +105,18 @@ namespace FunctionalTests
         [TestMethod]
         public void TakeRandomized()
         {
-            var target = GetCollection();
+            PriorityQueue<int> target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             var store = new SortedSet<int>();
             var random = new Random();
             const int count = 1000;
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
-                var item = random.Next(2 * count);
+                int item = random.Next(2*count);
                 while (store.Contains(item))
                 {
-                    item = random.Next(2 * count);
+                    item = random.Next(2*count);
                 }
 
                 if (target.Count < 10)
@@ -134,19 +134,21 @@ namespace FunctionalTests
             }
         }
 
-        private void CheckStructure(PriorityQueue<int> queue)
+        private static void CheckStructure(PriorityQueue<int> queue)
         {
             for (int i = 0; i < queue.Count/2; i++)
             {
-                var left = (i + 1)*2 - 1;
-                var right = (i + 1)*2;
+                int left = (i + 1)*2 - 1;
+                int right = (i + 1)*2;
                 if (queue._heap[i] < queue._heap[left])
                 {
-                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}", queue._heap[i], i, queue._heap[left], left);
-                }                
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
+                        queue._heap[i], i, queue._heap[left], left);
+                }
                 if (right < queue._heap.Length && queue._heap[i] < queue._heap[right])
                 {
-                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}", queue._heap[i], i, queue._heap[right], right);
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
+                        queue._heap[i], i, queue._heap[right], right);
                 }
             }
         }
@@ -154,7 +156,7 @@ namespace FunctionalTests
         [TestMethod]
         public void PeekSimple()
         {
-            var target = GetCollection();
+            PriorityQueue<int> target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             AssertEx.Throws<InvalidOperationException>(() => target.Peek());
@@ -177,6 +179,31 @@ namespace FunctionalTests
             target.Add(3);
             Assert.AreEqual(3, target.Peek());
             Assert.AreEqual(3, target.Count);
+        }
+
+        [TestMethod]
+        public void PeekRandomized()
+        {
+            PriorityQueue<int> target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            var store = new SortedSet<int>();
+            var random = new Random();
+            const int count = 1000;
+            for (int i = 0; i < count; i++)
+            {
+                int item = random.Next(2*count);
+                while (store.Contains(item))
+                {
+                    item = random.Next(2*count);
+                }
+
+                target.Add(item);
+                store.Add(item);
+
+                Assert.AreEqual(store.Max, target.Peek());
+                CheckStructure(target);
+            }
         }
     }
 }
