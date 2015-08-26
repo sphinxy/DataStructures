@@ -8,6 +8,7 @@ namespace FunctionalTests
     public abstract class CollectionTests<T> where T:ICollection<int>
     {
         protected internal abstract T GetCollection();
+        protected internal abstract void CheckStructure(T target);
 
         [TestMethod]
         public virtual void AddSimple()
@@ -66,6 +67,7 @@ namespace FunctionalTests
                 {
                     Assert.AreEqual(store[j], target.Contains(j));
                 }
+                CheckStructure(target);
             }
         }
 
@@ -196,6 +198,7 @@ namespace FunctionalTests
                 {
                     Assert.AreEqual(store[j], target.Contains(j));
                 }
+                CheckStructure(target);
             }
         }
 

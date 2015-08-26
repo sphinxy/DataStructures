@@ -67,6 +67,7 @@ namespace DataStructures
             if (Count == Capacity) GrowCapacity();
 
             _heap[Count++] = item;
+            // provide the index of the last item as for 1-based heap, but also set shift to -1
             _heap.Sift(Count, _comparer);      // move item "up" until heap principles are not met
         }
 
@@ -83,6 +84,7 @@ namespace DataStructures
             Count--;
             _heap.Swap(0, Count);              // last element at count
             _heap[Count] = default(T);         // release hold on the object
+            // provide index of first item as for 1-based heap, but also set shift to -1
             _heap.Sink(1, Count, _comparer);   // move item "down" while heap principles are not met            
 
             if (Count <= _shrinkBound && Count > DEFAULT_CAPACITY)
@@ -130,7 +132,7 @@ namespace DataStructures
 
         public bool Remove(T item)
         {
-            int index = GetItemIndex(item);
+            var index = GetItemIndex(item);
             switch (index)
             {
                 case -1:
@@ -140,17 +142,20 @@ namespace DataStructures
                     break;
                 default:
                     Count--;
-                    _heap.Swap(index, Count);   // last element at Count
-                    _heap[Count] = default(T);  // release hold on the object
-                    int parent = index / 2;     // get parent
+                    _heap.Swap(index, Count);           // last element at Count
+                    _heap[Count] = default(T);          // release hold on the object
+                    // use a 1-based-heap index and then apply shift of -1
+                    var parent = (index + 1) / 2 - 1;   // get parent
                     // if new item at index is greater than it's parent then sift it up, else sink it down
                     if (_comparer.GreaterOrEqual(_heap[index], _heap[parent]))
                     {
-                        _heap.Sift(index, _comparer);
+                        // provide a 1-based-heap index
+                        _heap.Sift(index + 1, _comparer);
                     }
                     else
                     {
-                        _heap.Sink(index, Count, _comparer);
+                        // provide a 1-based-heap index
+                        _heap.Sink(index + 1, Count, _comparer);
                     }
                     break;
             }

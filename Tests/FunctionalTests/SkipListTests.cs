@@ -13,6 +13,11 @@ namespace FunctionalTests
             return new SkipList<int>();
         }
 
+        protected internal override void CheckStructure(SkipList<int> target)
+        {
+            // TODO check skip list structure
+        }
+
         [TestMethod]
         public void Peek()
         {

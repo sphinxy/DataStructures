@@ -134,7 +134,7 @@ namespace FunctionalTests
             }
         }
 
-        private static void CheckStructure(PriorityQueue<int> queue)
+        protected internal override void CheckStructure(PriorityQueue<int> queue)
         {
             for (int i = 0; i < queue.Count/2; i++)
             {
