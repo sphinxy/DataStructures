@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace DataStructures
 {
     /// <summary>
-    /// Heap-based resizable max priority queue.
+    /// Heap-based resizable max-priority queue.
     /// Elements with high priority are served before elements with low priority.
     /// Priority is defined by comparing elements, so to separate priority from value use
     /// KeyValuePair or a custom class and provide corresponding Comparer.
@@ -25,13 +25,13 @@ namespace DataStructures
         private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
 
         /// <summary>
-        /// Create a max-priority queue with default capacity.
+        /// Create a max-priority queue with default capacity of 10.
         /// </summary>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         public PriorityQueue(IComparer<T> comparer = null) : this(DEFAULT_CAPACITY, comparer) { }
 
         /// <summary>
-        /// Create a max-priority queue with initial capacity.
+        /// Create a max-priority queue with provided capacity.
         /// </summary>
         /// <param name="capacity">Initial capacity</param>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
@@ -68,7 +68,7 @@ namespace DataStructures
 
             _heap[Count++] = item;
             // provide the index of the last item as for 1-based heap, but also set shift to -1
-            _heap.Sift(Count, _comparer);      // move item "up" until heap principles are not met
+            _heap.Sift(Count, _comparer, shift: -1);      // move item "up" until heap principles are not met
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace DataStructures
             _heap.Swap(0, Count);              // last element at count
             _heap[Count] = default(T);         // release hold on the object
             // provide index of first item as for 1-based heap, but also set shift to -1
-            _heap.Sink(1, Count, _comparer);   // move item "down" while heap principles are not met            
+            _heap.Sink(1, Count, _comparer, shift: -1);   // move item "down" while heap principles are not met            
 
             if (Count <= _shrinkBound && Count > DEFAULT_CAPACITY)
             {
@@ -141,27 +141,39 @@ namespace DataStructures
                     Take();
                     break;
                 default:
-                    Count--;
-                    _heap.Swap(index, Count);           // last element at Count
-                    _heap[Count] = default(T);          // release hold on the object
-                    // use a 1-based-heap index and then apply shift of -1
-                    var parent = (index + 1) / 2 - 1;   // get parent
-                    // if new item at index is greater than it's parent then sift it up, else sink it down
-                    if (_comparer.GreaterOrEqual(_heap[index], _heap[parent]))
-                    {
-                        // provide a 1-based-heap index
-                        _heap.Sift(index + 1, _comparer);
-                    }
-                    else
-                    {
-                        // provide a 1-based-heap index
-                        _heap.Sink(index + 1, Count, _comparer);
-                    }
+                    // provide a 1-based index of the item
+                    RemoveAt(index + 1, shift: -1);
                     break;
             }
 
             return true;
+        }
 
+        /// <summary>
+        /// Removes item at given index
+        /// </summary>
+        /// <param name="index">1-based index of the element to remove</param>
+        /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
+        /// Shift -1 allows to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.</param>
+        private void RemoveAt(int index, int shift)
+        {
+            var itemIndex = index + shift;
+            Count--;
+            _heap.Swap(itemIndex, Count);       // last element at Count
+            _heap[Count] = default(T);          // release hold on the object
+            // use a 1-based-heap index and then apply shift of -1
+            var parent = index / 2 + shift;     // get parent
+            // if new item at index is greater than it's parent then sift it up, else sink it down
+            if (_comparer.GreaterOrEqual(_heap[itemIndex], _heap[parent]))
+            {
+                // provide a 1-based-heap index
+                _heap.Sift(index, _comparer, shift);
+            }
+            else
+            {
+                // provide a 1-based-heap index
+                _heap.Sink(index, Count, _comparer, shift);
+            }            
         }
 
         public int Count { get; private set; }
@@ -169,7 +181,7 @@ namespace DataStructures
         public bool IsReadOnly { get { return false; } }
 
         /// <summary>
-        /// Returns index of the first occurrence of the given item or -1.
+        /// Returns the real index of the first occurrence of the given item or -1.
         /// </summary>
         private int GetItemIndex(T item)
         {
@@ -219,9 +231,9 @@ namespace DataStructures
         /// <param name="count">Number of items in the heap</param>
         /// <param name="comparer">Comparer to compare the items</param>
         /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
-        /// Default value of -1 allowes to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
+        /// Shift -1 allows to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
         /// </param>
-        internal static void Sink<T>(this T[] heap, int i, int count, IComparer<T> comparer, int shift = -1)
+        internal static void Sink<T>(this T[] heap, int i, int count, IComparer<T> comparer, int shift)
         {
             var lastIndex = count + shift;
             while (true)
@@ -239,7 +251,7 @@ namespace DataStructures
                 var left = heap[leftIndex];
                 var right = hasRight ? heap[rightIndex] : default(T);
 
-                // if item is greater than children - exit
+                // if item is greater than children - heap is fine, exit
                 if (GreaterOrEqual(comparer, item, left) && (!hasRight || GreaterOrEqual(comparer, item, right)))
                 {
                     return;
@@ -262,9 +274,9 @@ namespace DataStructures
         /// <param name="i">1-based index of the element to sink</param>
         /// <param name="comparer">Comparer to compare the items</param>
         /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
-        /// Default value of -1 allowes to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
+        /// Value -1 allows to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
         /// </param>        
-        internal static void Sift<T>(this T[] heap, int i, IComparer<T> comparer, int shift = -1)
+        internal static void Sift<T>(this T[] heap, int i, IComparer<T> comparer, int shift)
         {
             while (true)
             {

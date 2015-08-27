@@ -9,9 +9,32 @@ namespace FunctionalTests
     [TestClass]
     public class PriorityQueueTests : CollectionTests<PriorityQueue<int>>
     {
-        protected internal override PriorityQueue<int> GetCollection()
+        protected internal override PriorityQueue<int> GetCollection(int? capacity = null)
         {
+            if (capacity.HasValue)
+            {
+                return new PriorityQueue<int>(capacity.Value);
+            }
             return new PriorityQueue<int>();
+        }
+
+        protected internal override void CheckStructure(PriorityQueue<int> queue)
+        {
+            for (int i = 0; i < queue.Count / 2; i++)
+            {
+                int left = (i + 1) * 2 - 1;
+                int right = (i + 1) * 2;
+                if (queue._heap[i] < queue._heap[left])
+                {
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
+                        queue._heap[i], i, queue._heap[left], left);
+                }
+                if (right < queue._heap.Length && queue._heap[i] < queue._heap[right])
+                {
+                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
+                        queue._heap[i], i, queue._heap[right], right);
+                }
+            }
         }
 
         [TestMethod]
@@ -105,7 +128,7 @@ namespace FunctionalTests
         [TestMethod]
         public void TakeRandomized()
         {
-            PriorityQueue<int> target = GetCollection();
+            var target = GetCollection();
             Assert.AreEqual(0, target.Count);
 
             var store = new SortedSet<int>();
@@ -131,25 +154,6 @@ namespace FunctionalTests
                     store.Remove(store.Max);
                 }
                 CheckStructure(target);
-            }
-        }
-
-        protected internal override void CheckStructure(PriorityQueue<int> queue)
-        {
-            for (int i = 0; i < queue.Count/2; i++)
-            {
-                int left = (i + 1)*2 - 1;
-                int right = (i + 1)*2;
-                if (queue._heap[i] < queue._heap[left])
-                {
-                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
-                        queue._heap[i], i, queue._heap[left], left);
-                }
-                if (right < queue._heap.Length && queue._heap[i] < queue._heap[right])
-                {
-                    Assert.Fail("Heap structure vaiolation. Item {0}:{1} must be greater or equal than {2}:{3}",
-                        queue._heap[i], i, queue._heap[right], right);
-                }
             }
         }
 
@@ -204,6 +208,49 @@ namespace FunctionalTests
                 Assert.AreEqual(store.Max, target.Peek());
                 CheckStructure(target);
             }
+        }
+
+        [TestMethod]
+        public void CapacityGrow()
+        {
+            var target = GetCollection(3);
+
+            Assert.AreEqual(0, target.Count);
+
+            target.Add(1);
+            target.Add(2);
+            target.Add(3);
+
+            target.Add(4);
+            Assert.AreEqual(4, target.Count);
+            Assert.AreEqual(6, target.Capacity);
+            string result = string.Join(",", target);
+            Assert.AreEqual("4,3,2,1", result);
+
+            target.Add(0);
+            Assert.AreEqual(5, target.Count);
+            Assert.AreEqual(6, target.Capacity);
+            result = string.Join(",", target);
+            Assert.AreEqual("4,3,2,1,0", result);
+        }
+
+        [TestMethod]
+        public void CapacityShrink()
+        {
+            var target = GetCollection(50);
+
+            for (var i = 0; i < 13; i++)
+            {
+                target.Add(i);
+            }
+            Assert.AreEqual(50, target.Capacity);
+            Assert.AreEqual(13, target.Count);
+            target.Take();
+            Assert.AreEqual(25, target.Capacity);
+            Assert.AreEqual(12, target.Count);
+            target.Take();
+            Assert.AreEqual(25, target.Capacity);
+            Assert.AreEqual(11, target.Count);
         }
     }
 }

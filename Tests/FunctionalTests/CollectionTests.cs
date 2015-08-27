@@ -7,7 +7,7 @@ namespace FunctionalTests
 {
     public abstract class CollectionTests<T> where T:ICollection<int>
     {
-        protected internal abstract T GetCollection();
+        protected internal abstract T GetCollection(int? capacity = null);
         protected internal abstract void CheckStructure(T target);
 
         [TestMethod]
@@ -98,6 +98,7 @@ namespace FunctionalTests
                 target.Add(i);
             }
 
+            // ReSharper disable once AssignNullToNotNullAttribute
             AssertEx.Throws<ArgumentNullException>(() => target.CopyTo(null, 0));
             AssertEx.Throws<ArgumentOutOfRangeException>(() => target.CopyTo(new int[count], -1));
             AssertEx.Throws<ArgumentException>(() => target.CopyTo(new int[1], 0));

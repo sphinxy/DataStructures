@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using DataStructures;
 using FunctionalTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,18 +9,28 @@ namespace FunctionalTests
     [TestClass]
     public class SkipListTests : CollectionTests<SkipList<int>>
     {
-        protected internal override SkipList<int> GetCollection()
+        protected internal override SkipList<int> GetCollection(int? capacity = null)
         {
             return new SkipList<int>();
         }
 
         protected internal override void CheckStructure(SkipList<int> target)
         {
-            // TODO check skip list structure
+            var node = target._head.GetNext(0);
+            while (node != target._tail)
+            {
+                for (var level = 0; level < node.Height; level++)
+                {
+                    var next = node.GetNext(level);
+                    Assert.IsTrue(next == target._tail || node.Item <= next.Item);
+                }
+
+                node = node.GetNext(0);
+            }
         }
 
         [TestMethod]
-        public void Peek()
+        public void PeekSimple()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
@@ -37,6 +48,31 @@ namespace FunctionalTests
             target.Add(0);
             Assert.AreEqual(0, target.Peek());
             Assert.AreEqual(3, target.Count);
+        }
+
+        [TestMethod]
+        public void PeekRandomized()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            var store = new SortedSet<int>();
+            var random = new Random();
+            const int count = 1000;
+            for (int i = 0; i < count; i++)
+            {
+                int item = random.Next(2 * count);
+                while (store.Contains(item))
+                {
+                    item = random.Next(2 * count);
+                }
+
+                target.Add(item);
+                store.Add(item);
+
+                Assert.AreEqual(store.Min, target.Peek());
+                CheckStructure(target);
+            }
         }
 
         [TestMethod]
@@ -86,7 +122,7 @@ namespace FunctionalTests
         }
 
         [TestMethod]
-        public void Take()
+        public void TakeSimple()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
@@ -116,7 +152,39 @@ namespace FunctionalTests
         }
 
         [TestMethod]
-        public void TakeLast()
+        public void TakeRandomized()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            var store = new SortedSet<int>();
+            var random = new Random();
+            const int count = 1000;
+            for (int i = 0; i < count; i++)
+            {
+                int item = random.Next(2 * count);
+                while (store.Contains(item))
+                {
+                    item = random.Next(2 * count);
+                }
+
+                if (target.Count < 10)
+                {
+                    target.Add(item);
+                    store.Add(item);
+                }
+                else
+                {
+                    item = target.Take();
+                    Assert.AreEqual(store.Min, item);
+                    store.Remove(store.Min);
+                }
+                CheckStructure(target);
+            }
+        }
+
+        [TestMethod]
+        public void TakeLastSimple()
         {
             var target = GetCollection();
             Assert.AreEqual(0, target.Count);
@@ -143,6 +211,38 @@ namespace FunctionalTests
             Assert.AreEqual(1, target.Count);
             Assert.AreEqual(0, target.TakeLast());
             Assert.AreEqual(0, target.Count);
+        }
+
+        [TestMethod]
+        public void TakeLastRandomized()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            var store = new SortedSet<int>();
+            var random = new Random();
+            const int count = 1000;
+            for (int i = 0; i < count; i++)
+            {
+                int item = random.Next(2 * count);
+                while (store.Contains(item))
+                {
+                    item = random.Next(2 * count);
+                }
+
+                if (target.Count < 10)
+                {
+                    target.Add(item);
+                    store.Add(item);
+                }
+                else
+                {
+                    item = target.TakeLast();
+                    Assert.AreEqual(store.Max, item);
+                    store.Remove(store.Max);
+                }
+                CheckStructure(target);
+            }
         }
 
         [TestMethod]
