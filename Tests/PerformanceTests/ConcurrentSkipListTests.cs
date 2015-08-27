@@ -7,19 +7,19 @@ using PerformanceTests.Helpers;
 namespace PerformanceTests
 {
     [TestClass]
-    public class SkipListPerformance
+    public class ConcurrentSkipListTests
     {
         [TestMethod]
-        public void SkipList_ConcurrentReadWritePerformance()
+        public void ConcurrentReadWritePerformance()
         {
             const int count = 10;
             var times = new int[count];
             var c = new ConcurrentSkipList<int>();
             for (var i = 0; i < count; i++)
             {
-                var t = new CollectionReadWritePerformance(c, 10, 5, 1000);
+                var t = new CollectionReadWritePerformance(c, 10, 5, 10000);
                 times[i] = t.Run().Milliseconds;
-                PrintSkipListForm(c);
+//                PrintSkipListForm(c);
                 c.Clear();
             }
 
@@ -28,7 +28,7 @@ namespace PerformanceTests
         }
 
         [TestMethod]
-        public void SkipList_Population()
+        public void Population()
         {
             var target = new SkipList<int>();
             for (int i = 0; i < 10000; i++)
@@ -38,7 +38,7 @@ namespace PerformanceTests
             PrintSkipListForm(target);
         }
 
-        private void PrintSkipListForm<T>(SkipList<T> target) where T : IComparable<T>
+        private static void PrintSkipListForm<T>(SkipList<T> target) where T : IComparable<T>
         {
             for (int i = target._height; i >= 0; i--)
             {

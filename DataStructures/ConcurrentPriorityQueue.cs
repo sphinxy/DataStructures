@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -11,7 +12,7 @@ namespace DataStructures
     /// KeyValuePair or a custom class and provide corresponding Comparer.
     /// </summary>
     /// <typeparam name="T">Any comparable type</typeparam>
-    public class ConcurrentPriorityQueue<T> : PriorityQueue<T> where T : IComparable<T>
+    public class ConcurrentPriorityQueue<T> : PriorityQueue<T>, IProducerConsumerCollection<T>, IDisposable where T : IComparable<T>
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
@@ -46,6 +47,12 @@ namespace DataStructures
             {
                 _lock.ExitWriteLock();
             }
+        }
+
+        public bool TryAdd(T item)
+        {
+            Add(item);
+            return false;
         }
 
         public override void Clear()
@@ -85,6 +92,34 @@ namespace DataStructures
             finally
             {
                if (!hasLock) _lock.ExitReadLock();
+            }
+        }
+
+        public void CopyTo(Array array, int index)
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                base.CopyTo((T[])array, index);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public T[] ToArray()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                var array = new T[Count];
+                CopyTo(array, 0);
+                return array;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -160,6 +195,37 @@ namespace DataStructures
             {
                 _lock.ExitWriteLock();
             }
+        }
+
+        public bool TryTake(out T item)
+        {
+            item = default(T);
+            _lock.EnterUpgradeableReadLock();
+            try
+            {
+                if (Count == 0) return false;
+                item = Take();
+                return true;
+            }
+            finally
+            {
+                _lock.ExitUpgradeableReadLock();
+            }
+        }
+
+        public object SyncRoot
+        {
+            get { throw new NotSupportedException(""); }
+        }
+
+        public bool IsSynchronized
+        {
+            get { return false; }
+        }
+
+        public void Dispose()
+        {
+            ((IDisposable) _lock).Dispose();
         }
     }
 }

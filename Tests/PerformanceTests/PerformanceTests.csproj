@@ -50,8 +50,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ConcurrentPriorityQueueTests.cs" />
     <Compile Include="Helpers\CollectionReadWritePerformance.cs" />
-    <Compile Include="SkipListPerformance.cs" />
+    <Compile Include="Helpers\ExecWithStats.cs" />
+    <Compile Include="ConcurrentSkipListTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

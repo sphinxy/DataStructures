@@ -194,6 +194,32 @@ namespace DataStructures
             return node.Item;            
         }
 
+        /// <summary>
+        /// Returns the list of items greater (or equal) than fromItem and less (or equal) than toItem.
+        /// </summary>
+        /// <param name="fromItem">The greatest item, less than or equal to items in the returned result.</param>
+        /// <param name="toItem">The least item, greater or equal to items in the returned result.</param>
+        /// <param name="includeFromItem">If true, items equal to fromItem will be included in result, else - only items greater than fromItem.</param>
+        /// <param name="includeToItem">If true, items equal to toItem will be included in result, else only items less than toItem.</param>
+        /// <returns>A list of items greater (or equal) than fromItem and less (or equal) than toItem.</returns>
+        public virtual IEnumerable<T> Range(T fromItem, T toItem, bool includeFromItem = true, bool includeToItem = true)
+        {
+            Node node = FindNode(fromItem);
+            int minCompareResult = includeFromItem ? 0 : 1;
+            while (CompareNode(node, fromItem) < minCompareResult)
+            {
+                node = node.GetNext(0);
+            }
+            var result = new LinkedList<T>();
+            minCompareResult = includeToItem ? 1 : 0;
+            while (node != _tail && CompareNode(node, toItem) < minCompareResult)
+            {
+                result.AddLast(node.Item);
+                node = node.GetNext(0);
+            }
+            return result;
+        } 
+
         public virtual IEnumerator<T> GetEnumerator()
         {
             var items = new LinkedList<T>();

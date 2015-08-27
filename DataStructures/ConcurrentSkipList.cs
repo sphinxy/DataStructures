@@ -234,6 +234,19 @@ namespace DataStructures
             return true;
         }
 
+        public override IEnumerable<T> Range(T fromItem, T toItem, bool includeFromItem = true, bool includeToItem = true)
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                return base.Range(fromItem, toItem, includeFromItem, includeToItem);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
         public T[] ToArray()
         {
             T[] array;
