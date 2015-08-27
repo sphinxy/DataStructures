@@ -50,7 +50,7 @@ namespace DataStructures
         /// </summary>
         public int Capacity { get { return _heap.Length; } }
 
-        public IEnumerator<T> GetEnumerator()
+        public virtual IEnumerator<T> GetEnumerator()
         {
             var array = new T[Count];
             CopyTo(array, 0);
@@ -62,7 +62,7 @@ namespace DataStructures
             return GetEnumerator();
         }
 
-        public void Add(T item)
+        public virtual void Add(T item)
         {
             if (Count == Capacity) GrowCapacity();
 
@@ -106,18 +106,18 @@ namespace DataStructures
             return _heap[0];
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _heap = new T[DEFAULT_CAPACITY];
             Count = 0;
         }
 
-        public bool Contains(T item)
+        public virtual bool Contains(T item)
         {
             return GetItemIndex(item) >= 0;
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public virtual void CopyTo(T[] array, int arrayIndex)
         {
             if (array == null) throw new ArgumentNullException("array");
             if (arrayIndex < 0) throw new ArgumentOutOfRangeException("arrayIndex");
@@ -130,7 +130,7 @@ namespace DataStructures
             array.HeapSort(arrayIndex, Count, _comparer);
         }
 
-        public bool Remove(T item)
+        public virtual bool Remove(T item)
         {
             var index = GetItemIndex(item);
             switch (index)
@@ -149,13 +149,17 @@ namespace DataStructures
             return true;
         }
 
+        public int Count { get; private set; }
+
+        public bool IsReadOnly { get { return false; } }
+
         /// <summary>
         /// Removes item at given index
         /// </summary>
         /// <param name="index">1-based index of the element to remove</param>
         /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
         /// Shift -1 allows to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.</param>
-        private void RemoveAt(int index, int shift)
+        protected internal void RemoveAt(int index, int shift)
         {
             var itemIndex = index + shift;
             Count--;
@@ -173,17 +177,13 @@ namespace DataStructures
             {
                 // provide a 1-based-heap index
                 _heap.Sink(index, Count, _comparer, shift);
-            }            
+            }
         }
-
-        public int Count { get; private set; }
-
-        public bool IsReadOnly { get { return false; } }
 
         /// <summary>
         /// Returns the real index of the first occurrence of the given item or -1.
         /// </summary>
-        private int GetItemIndex(T item)
+        protected internal int GetItemIndex(T item)
         {
             for (int i = 0; i < Count; i++)
             {

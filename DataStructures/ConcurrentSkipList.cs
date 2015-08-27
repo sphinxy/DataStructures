@@ -10,11 +10,6 @@ namespace DataStructures
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        public ConcurrentSkipList(IComparer<T> comparer = null) : base(comparer)
-        {
-            
-        }
-
         public override void Clear()
         {
             _lock.EnterWriteLock();
