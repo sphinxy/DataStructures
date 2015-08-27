@@ -354,5 +354,25 @@ namespace FunctionalTests
             }
             Assert.AreEqual(0, target.Ceiling(8));
         }
+
+        [TestMethod]
+        public void RangeSimple()
+        {
+            var target = GetCollection();
+            Assert.AreEqual(0, target.Count);
+
+            for (var i = 0; i < 10; i++)
+            {
+                target.Add(i);
+            }
+
+            Assert.AreEqual("0,1,2,3,4,5,6,7,8,9", string.Join(",", target.Range(-1, 10)));
+            Assert.AreEqual("0,1,2,3,4,5,6,7,8,9", string.Join(",", target.Range(0, 9)));
+            Assert.AreEqual("1,2,3,4,5,6,7,8,9", string.Join(",", target.Range(0, 9, false)));
+            Assert.AreEqual("1,2,3,4,5,6,7,8", string.Join(",", target.Range(0, 9, false, false)));
+            Assert.AreEqual("2,3,4,5,6,7", string.Join(",", target.Range(2, 7)));
+            Assert.AreEqual("2,3,4,5,6", string.Join(",", target.Range(2, 7, true, false)));
+            Assert.AreEqual("3,4,5,6,7", string.Join(",", target.Range(2, 7, false, true)));
+        }
     }
 }
