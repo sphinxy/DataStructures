@@ -12,9 +12,9 @@ Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Prio
 
 ###Features
 - Generic
-- Concurrent (i.e. thread-safe) using [ReaderWriterLockSlim](https://msdn.microsoft.com/en-us/library/system.threading.readerwriterlockslim(v=vs.110).aspx)
+- Thread-safe using [ReaderWriterLockSlim](https://msdn.microsoft.com/en-us/library/system.threading.readerwriterlockslim(v=vs.110).aspx)
 - Performant
-    - Take max - `O(1)`
+    - Take max item - `O(1)`
     - Insertion, Removal - `O(N log N)`
 - Resizable (queue grows and shrinks depending on the number of items)
 
@@ -31,15 +31,21 @@ Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Prio
 ##SkipList
 Generic concurrent [skiplist](https://en.wikipedia.org/wiki/Skip_list) for .NET
 
->Skip list is a data structure that allows fast search within an ordered sequence of elements.
+>This data structure makes random choices in arranging the entries in such
+>a way that search and update times are O(log N) **on average**, where N is the number
+>of entries in the list. Interestingly, the notion of average time complexity
+>used here does not depend on the probability distribution of the keys in the input.
+>Instead, it depends on the use of a random-number generator in the implementation
+>of the insertions to help decide where to place the new entry.
+>[Detailed overview] (https://msdn.microsoft.com/en-us/library/ms379573(VS.80).aspx#datastructures20_4_topic4) of skip list and a simple implementation.
 
 ###Features
  - Generic
- - Concurrent (i.e. thread-safe) using [ReaderWriterLockSlim](https://msdn.microsoft.com/en-us/library/system.threading.readerwriterlockslim(v=vs.110).aspx)
+ - Thread-safe using [ReaderWriterLockSlim](https://msdn.microsoft.com/en-us/library/system.threading.readerwriterlockslim(v=vs.110).aspx)
  - Performant
-    -Take min / max - `O(1)`
-    -Insertion, Removal, Check if contains - `O(log N)`
-    -Enumeration in order - `O(N)`
+    - Take min or max item - `O(1)`
+    - Insertion, Removal, Check if contains - `O(log N)`
+    - Enumeration in order - `O(N)`
  - Additional operations
     - Get Floor and Clealing items - `O(log N)`
     - Get items in range `O(log N + K)` (where K is number of items in result)

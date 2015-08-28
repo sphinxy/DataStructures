@@ -327,11 +327,12 @@ namespace DataStructures
         private byte GetNewNodeHeight()
         {
             byte maxNodeHeight = _height;
-            if (maxNodeHeight < MAX_HEIGHT && (1 << maxNodeHeight) < Count)
+            if (maxNodeHeight < MAX_HEIGHT)
             {
                 maxNodeHeight++;
             }
-            var nodeHeight = (byte) (1 + _random.Next(maxNodeHeight));
+            byte nodeHeight = 1;
+            while (_random.NextDouble() < 0.5 && nodeHeight < maxNodeHeight) nodeHeight++;
             if (nodeHeight > _height)
             {
                 _height = nodeHeight;
