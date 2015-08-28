@@ -1,7 +1,9 @@
 C# implementations of some usefull data sctructures for .NET
+ - [Priority queue](##ConcurrentPriorityQueue)
+ - [Skip list](##SkipList)
 
 
-##ConcurrentPriorityQueue
+##Priority queue
 Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Priority_queue) for .NET
 
 >Priority queue is an abstract data type which is like a regular queue or 
@@ -14,8 +16,7 @@ Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Prio
 - Generic
 - Thread-safe using [ReaderWriterLockSlim](https://msdn.microsoft.com/en-us/library/system.threading.readerwriterlockslim(v=vs.110).aspx)
 - Performant
-    - Take max item - `O(1)`
-    - Insertion, Removal - `O(N log N)`
+    - Take max item, Insertion, Removal - `O(N log N)`
 - Resizable (queue grows and shrinks depending on the number of items)
 
 ###Applications
@@ -28,7 +29,7 @@ Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Prio
 - [Dijkstra's algorithm](http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 - [Prim's Algorithm](http://en.wikipedia.org/wiki/Prim%27s_algorithm) for Minimum Spanning Tree
 
-##SkipList
+##Skip list
 Generic concurrent [skiplist](https://en.wikipedia.org/wiki/Skip_list) for .NET
 
 >This data structure makes random choices in arranging the entries in such
@@ -49,6 +50,11 @@ Generic concurrent [skiplist](https://en.wikipedia.org/wiki/Skip_list) for .NET
  - Additional operations
     - Get Floor and Clealing items - `O(log N)`
     - Get items in range `O(log N + K)` (where K is number of items in result)
+
+###Applications
+
+- Can be used as priority queue
+- [Moving medians](https://en.wikipedia.org/wiki/Moving_average#Moving_median)
 
 #License
 Released under the MIT license.
