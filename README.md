@@ -1,6 +1,6 @@
 C# implementations of some usefull data sctructures for .NET
- - [Priority queue](##ConcurrentPriorityQueue)
- - [Skip list](##SkipList)
+ - [Priority queue](#priority-queue)
+ - [Skip list](#skip-list)
 
 
 ##Priority queue
