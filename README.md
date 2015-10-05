@@ -19,6 +19,10 @@ Heap-based generic concurrent [priority queue](http://en.wikipedia.org/wiki/Prio
     - Take max item, Insertion, Removal - `O(N log N)`
 - Resizable (queue grows and shrinks depending on the number of items)
 
+#NuGet
+- Install `PM> Install-Package ConcurrentDataStructures`
+- [https://www.nuget.org/packages/ConcurrentDataStructures](https://www.nuget.org/packages/ConcurrentDataStructures//)
+
 ###Applications
 
 - Bandwidth management

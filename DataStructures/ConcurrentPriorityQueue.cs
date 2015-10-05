@@ -52,7 +52,7 @@ namespace DataStructures
         public bool TryAdd(T item)
         {
             Add(item);
-            return false;
+            return true;
         }
 
         public override void Clear()
