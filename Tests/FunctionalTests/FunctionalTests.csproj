@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ConcurrentPriorityQueueTests.cs" />
+    <Compile Include="KeyValuePairComparerTests.cs" />
     <Compile Include="PriorityQueueTests.cs" />
     <Compile Include="SkipListTests.cs" />
     <Compile Include="Helpers\AssertEx.cs" />

@@ -10,8 +10,8 @@ namespace DataStructures
     /// Priority is defined by comparing elements, so to separate priority from value use
     /// KeyValuePair or a custom class and provide corresponding Comparer.
     /// </summary>
-    /// <typeparam name="T">Any comparable type</typeparam>
-    public class PriorityQueue<T> : ICollection<T> where T : IComparable<T>
+    /// <typeparam name="T">Any comparable type, either through a specified Comparer or implementing IComparable&lt;<typeparamref name="T"/>&gt;</typeparam>
+    public class PriorityQueue<T> : ICollection<T>
     {
         private readonly IComparer<T> _comparer;
         internal T[] _heap;
@@ -36,9 +36,18 @@ namespace DataStructures
         /// <param name="capacity">Initial capacity</param>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Throws <see cref="ArgumentOutOfRangeException"/> when capacity is less than or equal to zero.</exception>
+        /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> is not comparable</exception>
         public PriorityQueue(int capacity, IComparer<T> comparer = null)
         {
             if (capacity <= 0) throw new ArgumentOutOfRangeException("capacity", "Expected capacity greater than zero.");
+
+            // If no comparer then T must be comparable
+            if (comparer == null &&
+                !(typeof(IComparable).IsAssignableFrom(typeof(T)) ||
+                  typeof(IComparable<T>).IsAssignableFrom(typeof(T))))
+            {
+                throw new ArgumentException("Must specify a comparer for types which are not comparable", "comparer");
+            }
 
             _comparer = comparer ?? Comparer<T>.Default;
             _shrinkBound = capacity / SHRINK_RATIO;

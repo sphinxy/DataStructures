@@ -6,7 +6,6 @@ using System.Diagnostics;
 namespace DataStructures
 {
     public class SkipList<T> : ICollection<T>
-        where T : IComparable<T>
     {
         private const byte MAX_HEIGHT = 32;
         internal const byte HEIGHT_STEP = 4;
@@ -24,6 +23,14 @@ namespace DataStructures
 
         public SkipList(IComparer<T> comparer = null)
         {
+            // If no comparer then T must be comparable
+            if (comparer == null &&
+                !(typeof(IComparable).IsAssignableFrom(typeof(T)) ||
+                  typeof(IComparable<T>).IsAssignableFrom(typeof(T))))
+            {
+                throw new ArgumentException("Must specify a comparer for types which are not comparable", "comparer");
+            }
+
             _comparer = comparer ?? Comparer<T>.Default;
             _random = new Random();
 

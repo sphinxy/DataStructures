@@ -252,5 +252,29 @@ namespace FunctionalTests
             Assert.AreEqual(25, target.Capacity);
             Assert.AreEqual(11, target.Count);
         }
+
+        [TestMethod]
+        public void UseCustomComparer()
+        {
+            PriorityQueue<KeyValuePair<int, string>> target =
+                new PriorityQueue<KeyValuePair<int, string>>(new KeyValuePairComparer<int, string>())
+            {
+                new KeyValuePair<int, string>(5, "1"),
+                new KeyValuePair<int, string>(7, "2"),
+                new KeyValuePair<int, string>(3, "3")
+            };
+
+            Assert.AreEqual("2", target.Take().Value);
+            Assert.AreEqual("1", target.Take().Value);
+            Assert.AreEqual("3", target.Take().Value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (ArgumentException))]
+        public void InstantiateWithNonComparableTypeAndNoComparer()
+        {
+            // ReSharper disable once ObjectCreationAsStatement
+            new PriorityQueue<KeyValuePair<int, string>>();
+        }
     }
 }
