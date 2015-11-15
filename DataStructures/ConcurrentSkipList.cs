@@ -6,7 +6,6 @@ using System.Threading;
 namespace DataStructures
 {
     public class ConcurrentSkipList<T> : SkipList<T>, IProducerConsumerCollection<T>, IDisposable
-        where T : IComparable<T>
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 

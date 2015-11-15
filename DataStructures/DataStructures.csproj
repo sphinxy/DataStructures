@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConcurrentPriorityQueue.cs" />
+    <Compile Include="KeyValuePairComparer.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="SkipList.cs" />
     <Compile Include="ConcurrentSkipList.cs" />

@@ -11,8 +11,8 @@ namespace DataStructures
     /// Priority is defined by comparing elements, so to separate priority from value use
     /// KeyValuePair or a custom class and provide corresponding Comparer.
     /// </summary>
-    /// <typeparam name="T">Any comparable type</typeparam>
-    public class ConcurrentPriorityQueue<T> : PriorityQueue<T>, IProducerConsumerCollection<T>, IDisposable where T : IComparable<T>
+    /// <typeparam name="T">Any comparable type, either through a specified Comparer or implementing IComparable&lt;<typeparamref name="T"/>&gt;</typeparam>
+    public class ConcurrentPriorityQueue<T> : PriorityQueue<T>, IProducerConsumerCollection<T>, IDisposable
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
@@ -31,6 +31,7 @@ namespace DataStructures
         /// <param name="capacity">Initial capacity</param>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Throws <see cref="ArgumentOutOfRangeException"/> when capacity is less than or equal to zero.</exception>
+        /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> is not comparable</exception>
         public ConcurrentPriorityQueue(int capacity, IComparer<T> comparer = null) : base(capacity, comparer)
         {
             
