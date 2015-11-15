@@ -21,6 +21,11 @@ namespace DataStructures
         // ReSharper disable once StaticFieldInGenericType
         private static readonly InvalidOperationException EmptyCollectionException = new InvalidOperationException("Collection is empty.");
 
+        /// <summary>
+        /// Create a new instance of skip list.
+        /// </summary>
+        /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
+        /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> does not implement IComparable.</exception>
         public SkipList(IComparer<T> comparer = null)
         {
             // If no comparer then T must be comparable
@@ -28,7 +33,7 @@ namespace DataStructures
                 !(typeof(IComparable).IsAssignableFrom(typeof(T)) ||
                   typeof(IComparable<T>).IsAssignableFrom(typeof(T))))
             {
-                throw new ArgumentException("Must specify a comparer for types which are not comparable", "comparer");
+                throw new ArgumentException("Expected a comparer for types, which do not implement IComparable.", "comparer");
             }
 
             _comparer = comparer ?? Comparer<T>.Default;

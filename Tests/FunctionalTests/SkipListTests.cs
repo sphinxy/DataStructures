@@ -372,7 +372,7 @@ namespace FunctionalTests
             Assert.AreEqual("1,2,3,4,5,6,7,8", string.Join(",", target.Range(0, 9, false, false)));
             Assert.AreEqual("2,3,4,5,6,7", string.Join(",", target.Range(2, 7)));
             Assert.AreEqual("2,3,4,5,6", string.Join(",", target.Range(2, 7, true, false)));
-            Assert.AreEqual("3,4,5,6,7", string.Join(",", target.Range(2, 7, false, true)));
+            Assert.AreEqual("3,4,5,6,7", string.Join(",", target.Range(2, 7, false)));
         }
 
         [TestMethod]

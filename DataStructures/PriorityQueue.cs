@@ -36,7 +36,7 @@ namespace DataStructures
         /// <param name="capacity">Initial capacity</param>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         /// <exception cref="ArgumentOutOfRangeException">Throws <see cref="ArgumentOutOfRangeException"/> when capacity is less than or equal to zero.</exception>
-        /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> is not comparable</exception>
+        /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> does not implement IComparable.</exception>
         public PriorityQueue(int capacity, IComparer<T> comparer = null)
         {
             if (capacity <= 0) throw new ArgumentOutOfRangeException("capacity", "Expected capacity greater than zero.");
@@ -46,7 +46,7 @@ namespace DataStructures
                 !(typeof(IComparable).IsAssignableFrom(typeof(T)) ||
                   typeof(IComparable<T>).IsAssignableFrom(typeof(T))))
             {
-                throw new ArgumentException("Must specify a comparer for types which are not comparable", "comparer");
+                throw new ArgumentException("Expected a comparer for types, which do not implement IComparable.", "comparer");
             }
 
             _comparer = comparer ?? Comparer<T>.Default;

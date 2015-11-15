@@ -256,7 +256,7 @@ namespace FunctionalTests
         [TestMethod]
         public void UseCustomComparer()
         {
-            PriorityQueue<KeyValuePair<int, string>> target =
+            var target =
                 new PriorityQueue<KeyValuePair<int, string>>(new KeyValuePairComparer<int, string>())
             {
                 new KeyValuePair<int, string>(5, "1"),
