@@ -12,7 +12,7 @@ namespace DataStructures
         private readonly IComparer<T> _comparer;
 
         internal readonly Node _head;
-        private readonly Random _random = new Random();
+        private readonly Random _random;
         internal readonly Node _tail;
 
         internal byte _height;
