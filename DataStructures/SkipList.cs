@@ -26,7 +26,7 @@ namespace DataStructures
         /// </summary>
         /// <param name="comparer">Custom comparer to compare elements. If omitted - default will be used.</param>
         /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> when comparer is null and <typeparamref name="T"/> does not implement IComparable.</exception>
-        public SkipList(IComparer<T> comparer = null)
+        public SkipList(IComparer<T> comparer)
         {
             // If no comparer then T must be comparable
             if (comparer == null &&
@@ -43,7 +43,7 @@ namespace DataStructures
             _tail = new Node(default(T), HEIGHT_STEP);
             Reset();
         }
-
+        public SkipList() : this(Comparer<T>.Default) { }
         /// <summary>
         /// Removes all items from the collection.
         /// </summary>
