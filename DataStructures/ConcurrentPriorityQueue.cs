@@ -115,7 +115,7 @@ namespace DataStructures
             try
             {
                 var array = new T[Count];
-                CopyTo(array, 0);
+                base.CopyTo(array, 0);
                 return array;
             }
             finally
