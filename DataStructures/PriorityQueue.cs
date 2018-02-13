@@ -77,7 +77,7 @@ namespace DataStructures
 
             _heap[Count++] = item;
             // provide the index of the last item as for 1-based heap, but also set shift to -1
-            _heap.Sift(Count, _comparer, shift: -1);      // move item "up" until heap principles are not met
+            _heap.Shift(Count, _comparer, shift: -1);      // move item "up" until heap principles are not met
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace DataStructures
             if (_comparer.GreaterOrEqual(_heap[itemIndex], _heap[parent]))
             {
                 // provide a 1-based-heap index
-                _heap.Sift(index, _comparer, shift);
+                _heap.Shift(index, _comparer, shift);
             }
             else
             {
@@ -285,7 +285,7 @@ namespace DataStructures
         /// <param name="shift">Shift allows to compensate and work with arrays where heap starts not from the element at position 1.
         /// Value -1 allows to work with 0-based heap as if it was 1-based. But the main reason for this is the CopyTo method.
         /// </param>        
-        internal static void Sift<T>(this T[] heap, int i, IComparer<T> comparer, int shift)
+        internal static void Shift<T>(this T[] heap, int i, IComparer<T> comparer, int shift)
         {
             while (true)
             {
