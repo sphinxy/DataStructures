@@ -13,7 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionalTests", "Tests\Fu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{372BA648-3FB9-4C12-9312-ED939327CE2F}"
 	ProjectSection(SolutionItems) = preProject
-		DataStructures\DataStructures.nuspec = DataStructures\DataStructures.nuspec
 		License.md = License.md
 		README.md = README.md
 	EndProjectSection
