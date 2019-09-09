@@ -380,7 +380,7 @@ namespace FunctionalTests
         public void InstantiateWithNonComparableTypeAndNoComparer()
         {
             // ReSharper disable once ObjectCreationAsStatement
-            new SkipList<KeyValuePair<int, string>>();
+            new SkipList<KeyValuePair<int, string>>(null);
         }
     }
 }
