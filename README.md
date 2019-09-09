@@ -62,3 +62,5 @@ Generic concurrent [skiplist](https://en.wikipedia.org/wiki/Skip_list) for .NET
 
 #License
 Released under the MIT license.
+
+[![Build Status](https://sphinxy.visualstudio.com/DataStructures/_apis/build/status/DataStructures-ASP.NET-CI?branchName=master)](https://sphinxy.visualstudio.com/DataStructures/_build/latest?definitionId=2&branchName=master)
